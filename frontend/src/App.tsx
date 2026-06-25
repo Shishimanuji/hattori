@@ -1,0 +1,81 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { AuthProvider } from './store/authContext'
+import { queryClient } from './store/queryClient'
+import Dashboard from './pages/Dashboard'
+import InfrastructureDashboard from './pages/InfrastructureDashboard'
+import Login from './pages/Login'
+import ProtectedRoute from './components/Common/ProtectedRoute'
+import Navbar from './components/Layout/Navbar'
+import Sidebar from './components/Layout/Sidebar'
+import { useState } from 'react'
+import './styles/globals.css'
+
+// Layout component for protected pages
+const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  return (
+    <ProtectedRoute>
+      <div className={`app-layout ${isSidebarOpen ? 'has-open-sidebar' : ''}`}>
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        <div className="main-content">
+          <Navbar onMenuToggle={toggleSidebar} />
+          <main className="content-inner">{children}</main>
+        </div>
+      </div>
+    </ProtectedRoute>
+  )
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public route - Login */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected routes - require authentication */}
+            <Route
+              path="/"
+              element={
+                <ProtectedLayout>
+                  <Dashboard />
+                </ProtectedLayout>
+              }
+            />
+            
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedLayout>
+                  <Dashboard />
+                </ProtectedLayout>
+              }
+            />
+            
+            <Route
+              path="/infrastructure"
+              element={
+                <ProtectedLayout>
+                  <InfrastructureDashboard />
+                </ProtectedLayout>
+              }
+            />
+            
+            {/* Catch all - redirect to dashboard */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
+  )
+}
+
+export default App

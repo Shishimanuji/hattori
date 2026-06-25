@@ -1,0 +1,239 @@
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AllocationControls } from './AllocationControls'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
+
+describe('AllocationControls Component', () => {
+  let queryClient: QueryClient
+
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    vi.clearAllMocks()
+  })
+
+  it('should render budget overview', () => {
+    const onAllocationChange = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={50000}
+          remainingBudget={50000}
+          onAllocationChange={onAllocationChange}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText('Budget Available')).toBeInTheDocument()
+    expect(screen.getByText(/50%/)).toBeInTheDocument()
+  })
+
+  it('should display warning when budget is 80%+ utilized', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={85000}
+          remainingBudget={15000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText('Budget Warning (80%+)')).toBeInTheDocument()
+    expect(screen.getByText(/85%/)).toBeInTheDocument()
+  })
+
+  it('should display error when budget is fully utilized', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={100000}
+          remainingBudget={0}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText('At Budget Limit')).toBeInTheDocument()
+    expect(screen.getByText('Budget Limit Reached')).toBeInTheDocument()
+    expect(screen.getByText(/100%/)).toBeInTheDocument()
+  })
+
+  it('should display budget summary correctly', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={25000}
+          remainingBudget={75000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText('Allocated')).toBeInTheDocument()
+    expect(screen.getByText('Remaining')).toBeInTheDocument()
+    expect(screen.getByText('Total Budget')).toBeInTheDocument()
+    expect(screen.getByText('$25,000.00')).toBeInTheDocument()
+    expect(screen.getByText('$75,000.00')).toBeInTheDocument()
+    expect(screen.getByText('$100,000.00')).toBeInTheDocument()
+  })
+
+  it('should show deallocation form when button is clicked', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={50000}
+          remainingBudget={50000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    const deallocateButton = screen.getByText('+ Deallocate Resource')
+    fireEvent.click(deallocateButton)
+
+    expect(screen.getByLabelText(/Resource ID to Deallocate/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Deallocation Amount/)).toBeInTheDocument()
+  })
+
+  it('should validate deallocation amount against allocated budget', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={50000}
+          remainingBudget={50000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    const deallocateButton = screen.getByText('+ Deallocate Resource')
+    fireEvent.click(deallocateButton)
+
+    const amountInput = screen.getByLabelText(/Deallocation Amount/)
+    fireEvent.change(amountInput, { target: { value: '100000' } })
+
+    // Should have max attribute set to allocated budget
+    expect(amountInput).toHaveAttribute('max', '50000')
+  })
+
+  it('should display quick reference section', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={50000}
+          remainingBudget={50000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText('Quick Reference')).toBeInTheDocument()
+    expect(screen.getByText(/Total Budget:/)).toBeInTheDocument()
+    expect(screen.getByText(/Currently Allocated:/)).toBeInTheDocument()
+    expect(screen.getByText(/Available for Allocation:/)).toBeInTheDocument()
+    expect(screen.getByText(/Utilization:/)).toBeInTheDocument()
+  })
+
+  it('should handle edge case with zero budget', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={0}
+          allocatedBudget={0}
+          remainingBudget={0}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText(/0%/)).toBeInTheDocument()
+  })
+
+  it('should handle negative remaining budget gracefully', () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={150000}
+          remainingBudget={-50000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    // Should display 0 for remaining when negative
+    expect(screen.getByText('$0.00')).toBeInTheDocument()
+  })
+
+  it('should display correct progress bar color at different utilization levels', () => {
+    const { container: greenContainer } = render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={25000}
+          remainingBudget={75000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    const greenBar = greenContainer.querySelector('.bg-green-600')
+    expect(greenBar).toBeInTheDocument()
+
+    // Yellow bar test
+    const { container: yellowContainer } = render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={85000}
+          remainingBudget={15000}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    const yellowBar = yellowContainer.querySelector('.bg-yellow-500')
+    expect(yellowBar).toBeInTheDocument()
+
+    // Red bar test
+    const { container: redContainer } = render(
+      <QueryClientProvider client={queryClient}>
+        <AllocationControls
+          projectId="proj-1"
+          projectBudget={100000}
+          allocatedBudget={100000}
+          remainingBudget={0}
+          onAllocationChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    const redBar = redContainer.querySelector('.bg-red-600')
+    expect(redBar).toBeInTheDocument()
+  })
+})

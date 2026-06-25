@@ -1,0 +1,231 @@
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { BrowserRouter } from 'react-router-dom'
+import Navbar from './Navbar'
+import { AuthContext } from '../../store/authContext'
+import { AuthContextType, AuthState } from '../../types'
+
+describe('Navbar Logout Functionality', () => {
+  const mockLogout = jest.fn()
+  const mockUser = {
+    id: '1',
+    username: 'testuser',
+    email: 'test@example.com',
+    role: 'Admin' as const,
+    is_active: true,
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+  }
+
+  const authenticatedContextValue: AuthContextType = {
+    state: {
+      user: mockUser,
+      token: 'test-token',
+      isAuthenticated: true,
+      isLoading: false,
+      error: null,
+    } as AuthState,
+    user: mockUser,
+    token: 'test-token',
+    isLoading: false,
+    isAuthenticated: true,
+    login: jest.fn(),
+    logout: mockLogout,
+    setUser: jest.fn(),
+    setToken: jest.fn(),
+    clearAuth: jest.fn(),
+    refreshToken: jest.fn(),
+  }
+
+  const unauthenticatedContextValue: AuthContextType = {
+    state: {
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+    } as AuthState,
+    user: null,
+    token: null,
+    isLoading: false,
+    isAuthenticated: false,
+    login: jest.fn(),
+    logout: jest.fn(),
+    setUser: jest.fn(),
+    setToken: jest.fn(),
+    clearAuth: jest.fn(),
+    refreshToken: jest.fn(),
+  }
+
+  it('should not render navbar when user is not authenticated', () => {
+    render(
+      <AuthContext.Provider value={unauthenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Navbar should not be visible
+    const navbar = screen.queryByRole('navigation')
+    expect(navbar).not.toBeInTheDocument()
+  })
+
+  it('should render navbar when user is authenticated', () => {
+    render(
+      <AuthContext.Provider value={authenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Navbar should be visible with user's username
+    const navbar = screen.queryByRole('navigation')
+    expect(navbar).toBeInTheDocument()
+    expect(screen.getByText('testuser')).toBeInTheDocument()
+  })
+
+  it('should display user menu when user menu button is clicked', () => {
+    render(
+      <AuthContext.Provider value={authenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Click the user menu button
+    const userMenuButton = screen.getByRole('button', { name: /user menu/i })
+    fireEvent.click(userMenuButton)
+
+    // User menu should be visible
+    expect(screen.getByText('View Profile')).toBeInTheDocument()
+    expect(screen.getByText('Logout')).toBeInTheDocument()
+  })
+
+  it('should call logout when logout button is clicked and confirmed', async () => {
+    mockLogout.mockResolvedValue(undefined)
+    window.confirm = jest.fn(() => true)
+
+    render(
+      <AuthContext.Provider value={authenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Click user menu button to open dropdown
+    const userMenuButton = screen.getByRole('button', { name: /user menu/i })
+    fireEvent.click(userMenuButton)
+
+    // Click logout button
+    const logoutButton = screen.getByRole('button', { name: /logout/i })
+    fireEvent.click(logoutButton)
+
+    // Confirm logout
+    expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to logout?')
+
+    // Wait for logout to be called
+    await waitFor(() => {
+      expect(mockLogout).toHaveBeenCalled()
+    })
+  })
+
+  it('should not logout if user cancels the confirmation', () => {
+    window.confirm = jest.fn(() => false)
+
+    render(
+      <AuthContext.Provider value={authenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Click user menu button to open dropdown
+    const userMenuButton = screen.getByRole('button', { name: /user menu/i })
+    fireEvent.click(userMenuButton)
+
+    // Click logout button
+    const logoutButton = screen.getByRole('button', { name: /logout/i })
+    fireEvent.click(logoutButton)
+
+    // Confirm logout was cancelled
+    expect(window.confirm).toHaveBeenCalled()
+    expect(mockLogout).not.toHaveBeenCalled()
+  })
+
+  it('should show loading state during logout', async () => {
+    const loadingLogout = jest.fn(
+      () => new Promise((resolve) => setTimeout(resolve, 100))
+    )
+    const contextWithLoadingLogout: AuthContextType = {
+      ...authenticatedContextValue,
+      logout: loadingLogout,
+    }
+    window.confirm = jest.fn(() => true)
+
+    render(
+      <AuthContext.Provider value={contextWithLoadingLogout}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Click user menu and logout
+    const userMenuButton = screen.getByRole('button', { name: /user menu/i })
+    fireEvent.click(userMenuButton)
+
+    const logoutButton = screen.getByRole('button', { name: /logout/i })
+    fireEvent.click(logoutButton)
+
+    // Should show loading state
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /logging out/i })).toBeInTheDocument()
+    })
+  })
+
+  it('should close menu when backdrop is clicked', () => {
+    render(
+      <AuthContext.Provider value={authenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Click user menu button
+    const userMenuButton = screen.getByRole('button', { name: /user menu/i })
+    fireEvent.click(userMenuButton)
+
+    // Menu should be open
+    expect(screen.getByText('Logout')).toBeInTheDocument()
+
+    // Click backdrop
+    const backdrop = screen.getByRole('button', { hidden: true })
+    fireEvent.click(backdrop)
+
+    // Menu should be closed
+    expect(screen.queryByText('Logout')).not.toBeInTheDocument()
+  })
+
+  it('should display user role in dropdown', () => {
+    render(
+      <AuthContext.Provider value={authenticatedContextValue}>
+        <BrowserRouter>
+          <Navbar />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    )
+
+    // Click user menu button
+    const userMenuButton = screen.getByRole('button', { name: /user menu/i })
+    fireEvent.click(userMenuButton)
+
+    // Role should be visible
+    expect(screen.getByText('Admin')).toBeInTheDocument()
+  })
+})

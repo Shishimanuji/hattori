@@ -1,0 +1,310 @@
+import React from 'react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ResourceForm } from './ResourceForm'
+import * as resourceService from '../../services/resources'
+import * as assetTypeService from '../../services/assetTypes'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
+
+// Mock the services
+vi.mock('../../services/resources', () => ({
+  resourceService: {
+    getResource: vi.fn(),
+    createResource: vi.fn(),
+    updateResource: vi.fn(),
+  },
+}))
+
+vi.mock('../../services/assetTypes', () => ({
+  assetTypeService: {
+    getAssetTypes: vi.fn(),
+    getAssetType: vi.fn(),
+  },
+}))
+
+describe('ResourceForm Component', () => {
+  let queryClient: QueryClient
+
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    vi.clearAllMocks()
+  })
+
+  const mockAssetTypes = [
+    {
+      id: 'at-1',
+      name: 'Personnel',
+      description: 'Personnel resources',
+      is_active: true,
+      custom_fields: [],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
+    {
+      id: 'at-2',
+      name: 'Equipment',
+      description: 'Equipment resources',
+      is_active: true,
+      custom_fields: [],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    },
+  ]
+
+  const mockAssetTypeSchema = {
+    id: 'at-1',
+    name: 'Personnel',
+    description: 'Personnel resources',
+    is_active: true,
+    field_count: 1,
+    custom_fields: [
+      {
+        id: 'cf-1',
+        asset_type_id: 'at-1',
+        name: 'department',
+        field_type: 'text',
+        is_required: true,
+        options: null,
+        validation_rules: {},
+        display_order: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      },
+    ],
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+  }
+
+  it('should render form with required fields', async () => {
+    const getAssetTypesSpy = vi.spyOn(assetTypeService, 'getAssetTypes' as any)
+    getAssetTypesSpy.mockResolvedValue({
+      data: mockAssetTypes,
+      total: 2,
+      page: 1,
+      limit: 10,
+    })
+
+    const onSuccess = vi.fn()
+    const onCancel = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceForm
+          projectId="proj-1"
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+        />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Resource Information')).toBeInTheDocument()
+      expect(screen.getByLabelText(/Resource Name/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Asset Type/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Cost/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Allocation Date/)).toBeInTheDocument()
+    })
+  })
+
+  it('should load asset types on mount', async () => {
+    const getAssetTypesSpy = vi.spyOn(assetTypeService, 'getAssetTypes' as any)
+    getAssetTypesSpy.mockResolvedValue({
+      data: mockAssetTypes,
+      total: 2,
+      page: 1,
+      limit: 10,
+    })
+
+    const onSuccess = vi.fn()
+    const onCancel = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceForm
+          projectId="proj-1"
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+        />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Personnel')).toBeInTheDocument()
+      expect(screen.getByText('Equipment')).toBeInTheDocument()
+    })
+  })
+
+  it('should validate required fields', async () => {
+    const getAssetTypesSpy = vi.spyOn(assetTypeService, 'getAssetTypes' as any)
+    getAssetTypesSpy.mockResolvedValue({
+      data: mockAssetTypes,
+      total: 2,
+      page: 1,
+      limit: 10,
+    })
+
+    const onSuccess = vi.fn()
+    const onCancel = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceForm
+          projectId="proj-1"
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+        />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Resource Information')).toBeInTheDocument()
+    })
+
+    const submitButton = screen.getByRole('button', { name: /Create Resource/i })
+    fireEvent.click(submitButton)
+
+    // Should show validation errors
+    await waitFor(() => {
+      expect(screen.getByText(/Name is required/)).toBeInTheDocument()
+      expect(screen.getByText(/Asset type is required/)).toBeInTheDocument()
+    })
+  })
+
+  it('should load custom fields when asset type is selected', async () => {
+    const getAssetTypesSpy = vi.spyOn(assetTypeService, 'getAssetTypes' as any)
+    const getAssetTypeSpy = vi.spyOn(assetTypeService, 'getAssetType' as any)
+
+    getAssetTypesSpy.mockResolvedValue({
+      data: mockAssetTypes,
+      total: 2,
+      page: 1,
+      limit: 10,
+    })
+
+    getAssetTypeSpy.mockResolvedValue(mockAssetTypeSchema)
+
+    const onSuccess = vi.fn()
+    const onCancel = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceForm
+          projectId="proj-1"
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+        />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Personnel')).toBeInTheDocument()
+    })
+
+    const assetTypeSelect = screen.getByLabelText(/Asset Type/)
+    fireEvent.change(assetTypeSelect, { target: { value: 'at-1' } })
+
+    // Should load custom fields
+    await waitFor(() => {
+      expect(getAssetTypeSpy).toHaveBeenCalledWith('at-1')
+    })
+  })
+
+  it('should submit form with valid data', async () => {
+    const getAssetTypesSpy = vi.spyOn(assetTypeService, 'getAssetTypes' as any)
+    const createResourceSpy = vi.spyOn(resourceService, 'createResource' as any)
+
+    getAssetTypesSpy.mockResolvedValue({
+      data: mockAssetTypes,
+      total: 2,
+      page: 1,
+      limit: 10,
+    })
+
+    createResourceSpy.mockResolvedValue({
+      id: 'res-1',
+      project_id: 'proj-1',
+      asset_type_id: 'at-1',
+      name: 'Test Resource',
+      cost: 1000,
+      allocation_date: '2024-01-15',
+      status: 'Active',
+      custom_fields: {},
+      created_by: 'user-1',
+      created_at: '2024-01-15T10:00:00Z',
+      updated_at: '2024-01-15T10:00:00Z',
+    })
+
+    const onSuccess = vi.fn()
+    const onCancel = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceForm
+          projectId="proj-1"
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+        />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Resource Name/)).toBeInTheDocument()
+    })
+
+    // Fill form
+    const nameInput = screen.getByLabelText(/Resource Name/)
+    const assetTypeSelect = screen.getByLabelText(/Asset Type/)
+    const costInput = screen.getByLabelText(/Cost/)
+
+    fireEvent.change(nameInput, { target: { value: 'Test Resource' } })
+    fireEvent.change(assetTypeSelect, { target: { value: 'at-1' } })
+    fireEvent.change(costInput, { target: { value: '1000' } })
+
+    // Submit
+    const submitButton = screen.getByRole('button', { name: /Create Resource/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(createResourceSpy).toHaveBeenCalled()
+      expect(onSuccess).toHaveBeenCalled()
+    })
+  })
+
+  it('should call onCancel when cancel button is clicked', async () => {
+    const getAssetTypesSpy = vi.spyOn(assetTypeService, 'getAssetTypes' as any)
+    getAssetTypesSpy.mockResolvedValue({
+      data: mockAssetTypes,
+      total: 2,
+      page: 1,
+      limit: 10,
+    })
+
+    const onSuccess = vi.fn()
+    const onCancel = vi.fn()
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceForm
+          projectId="proj-1"
+          onSuccess={onSuccess}
+          onCancel={onCancel}
+        />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Resource Information')).toBeInTheDocument()
+    })
+
+    const cancelButton = screen.getByRole('button', { name: /Cancel/i })
+    fireEvent.click(cancelButton)
+
+    expect(onCancel).toHaveBeenCalled()
+  })
+})
