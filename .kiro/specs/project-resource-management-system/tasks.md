@@ -296,27 +296,27 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.5**
 
 - [x] 12. Resource management frontend - UI, forms, custom field rendering
-  - [~] 12.1 Create ResourceList component
+  - [ ] 12.1 Create ResourceList component
     - Display paginated list of resources
     - Implement filtering by asset type, status, project
     - Show search functionality
     - Display resource details with status badges
     - _Requirements: 6.1, 6.7_
 
-  - [~] 12.2 Create ResourceForm component
+  - [ ] 12.2 Create ResourceForm component
     - Dynamically load asset type schema
     - Render all standard and custom field inputs
     - Implement form validation with error display
     - Submit to API
     - _Requirements: 6.1_
 
-  - [~] 12.3 Create ResourceDetail component
+  - [ ] 12.3 Create ResourceDetail component
     - Display all resource information
     - Show allocation history with dates and costs
     - Implement edit and delete buttons
     - _Requirements: 6.4, 6.10_
 
-  - [~] 12.4 Implement allocation UI controls
+  - [ ] 12.4 Implement allocation UI controls
     - Show allocated vs available budget
     - Display warning/error when budget exceeded
     - Implement deallocate functionality
@@ -328,25 +328,25 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 6.1_
 
 - [x] 13. RBAC enforcement backend - Middleware, decorators, permission checks
-  - [~] 13.1 Implement role-based access control decorator
+  - [ ] 13.1 Implement role-based access control decorator
     - Create @require_role(*roles) decorator for FastAPI routes
     - Check user role against required roles
     - Return 403 Forbidden for unauthorized access
     - _Requirements: 3.5, 3.6, 3.7, 3.8_
 
-  - [~] 13.2 Implement RBAC service layer
+  - [ ] 13.2 Implement RBAC service layer
     - Create authorization checks for create_project, edit_project, delete_project
     - Enforce permission matrix from design document
     - Check project ownership for Manager role
     - _Requirements: 3.6, 3.7_
 
-  - [~] 13.3 Implement Viewer/Analyst project scope limiting
+  - [ ] 13.3 Implement Viewer/Analyst project scope limiting
     - Limit Viewer access to only assigned projects
     - Allow Analyst access to all projects for read-only
     - Filter project lists based on user role
     - _Requirements: 1.5, 3.8_
 
-  - [~] 13.4 Implement resource-level authorization checks
+  - [ ] 13.4 Implement resource-level authorization checks
     - Enforce permissions on resource CRUD operations
     - Apply role-based filtering to resource lists
     - _Requirements: 3.5, 3.6_
@@ -453,37 +453,37 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 17. Excel import backend - Parsing, validation, processing
-  - [~] 17.1 Create Excel file parsing utilities
+  - [ ] 17.1 Create Excel file parsing utilities
     - Read .xlsx and .xls files using openpyxl/pandas
     - Extract headers and data rows
     - _Requirements: 9.2_
 
-  - [~] 17.2 Create import preview endpoint
+  - [ ] 17.2 Create import preview endpoint
     - POST /api/import/preview - Parse file and return preview
     - Validate file format and required columns
     - Return first 100 rows with validation status
     - _Requirements: 9.3, 9.4_
 
-  - [~] 17.3 Implement import validation logic
+  - [ ] 17.3 Implement import validation logic
     - Validate column headers against asset type fields
     - Check data types per field
     - Apply custom field validation rules
     - Check budget constraints
     - _Requirements: 9.4, 9.5_
 
-  - [~] 17.4 Create import execution service
+  - [ ] 17.4 Create import execution service
     - Implement background job for large imports
     - Process up to 10,000 records within 30 seconds
     - Create resource records in database
     - Assign to specified project
     - _Requirements: 9.6, 9.10_
 
-  - [~] 17.5 Create import status endpoint
+  - [ ] 17.5 Create import status endpoint
     - GET /api/import/status/{job-id} - Return progress
     - Implement job tracking and progress reporting
     - _Requirements: 9.7_
 
-  - [~] 17.6 Create import report generation
+  - [ ] 17.6 Create import report generation
     - Summarize successful imports, skipped rows, errors
     - Include row numbers and error reasons
     - _Requirements: 9.8_
@@ -494,30 +494,30 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - **Validates: Requirements 9.1, 9.2_
 
 - [x] 18. Excel import frontend - Upload, preview, status display
-  - [~] 18.1 Create ImportPage layout
+  - [ ] 18.1 Create ImportPage layout
     - Implement upload interface with drag-and-drop
     - Show file selection and project selection
     - _Requirements: 9.1_
 
-  - [~] 18.2 Implement file upload and preview
+  - [ ] 18.2 Implement file upload and preview
     - Upload file to POST /api/import/preview
     - Display preview table with validation status
     - Show row count and error count
     - _Requirements: 9.4, 9.5_
 
-  - [~] 18.3 Create import confirmation flow
+  - [ ] 18.3 Create import confirmation flow
     - Display preview results
     - Allow user to confirm import
     - Disable import if validation errors exist
     - _Requirements: 9.5, 9.6_
 
-  - [~] 18.4 Implement import progress tracking
+  - [ ] 18.4 Implement import progress tracking
     - Poll import status endpoint
     - Display progress bar
     - Show completion summary with results
     - _Requirements: 9.8_
 
-  - [~] 18.5 Create error report display
+  - [ ] 18.5 Create error report display
     - Display detailed error messages per row
     - Show problematic values and reasons
     - Allow user to download error report
@@ -529,24 +529,24 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 9.1_
 
 - [x] 19. Audit logging backend - Implementation, log retrieval, queries
-  - [~] 19.1 Create audit log model and service
+  - [ ] 19.1 Create audit log model and service
     - Create AuditLog SQLAlchemy model
     - Implement audit logging for create/update/delete operations
     - Capture old_values and new_values as JSON
     - _Requirements: 11.8, 19.1_
 
-  - [~] 19.2 Implement audit log integration
+  - [ ] 19.2 Implement audit log integration
     - Add audit log creation to all resource mutations
     - Record user ID, timestamp, IP address
     - _Requirements: 19.1_
 
-  - [~] 19.3 Create audit log retrieval endpoint
+  - [ ] 19.3 Create audit log retrieval endpoint
     - GET /api/audit-logs - List logs with filtering
     - Support filtering by user, entity type, date range
     - Return with pagination
     - _Requirements: 19.8_
 
-  - [~] 19.4 Implement audit log retention policy
+  - [ ] 19.4 Implement audit log retention policy
     - Maintain logs for at least 12 months
     - Implement log archive strategy
     - Protect logs from unauthorized access
@@ -558,23 +558,23 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 19.1_
 
 - [x] 20. Budget tracking implementation - Allocation, calculations, constraints
-  - [~] 20.1 Implement budget calculation service
+  - [ ] 20.1 Implement budget calculation service
     - Calculate project allocated_budget from active allocations
     - Calculate remaining_budget
     - Track utilization percentage
     - _Requirements: 10.1, 10.2_
 
-  - [~] 20.2 Implement budget constraint enforcement
+  - [ ] 20.2 Implement budget constraint enforcement
     - Block resource allocation when budget at 100%
     - Return 409 Conflict with error message
     - _Requirements: 10.4, 10.5_
 
-  - [~] 20.3 Implement allocation history tracking
+  - [ ] 20.3 Implement allocation history tracking
     - Record cost_at_allocation for historical accuracy
     - Track deallocation dates
     - _Requirements: 10.8_
 
-  - [~] 20.4 Create budget metrics endpoints
+  - [ ] 20.4 Create budget metrics endpoints
     - GET /api/projects/{id}/budget-status - Budget details
     - GET /api/budget/summary - Organization-wide budget summary
     - _Requirements: 10.2, 10.3_
@@ -584,24 +584,24 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - **Validates: Requirements 10.2, 10.4_
 
 - [x] 21. Error handling and validation frontend - Messages, highlighting, UX
-  - [~] 21.1 Create global error boundary component
+  - [ ] 21.1 Create global error boundary component
     - Catch React errors and display error page
     - Show error reference number for support
     - _Requirements: 15.5_
 
-  - [~] 21.2 Implement form field error display
+  - [ ] 21.2 Implement form field error display
     - Highlight invalid fields with red borders
     - Display field-specific error messages
     - Clear errors when field is corrected
     - _Requirements: 15.3_
 
-  - [~] 21.3 Implement API error handling
+  - [ ] 21.3 Implement API error handling
     - Parse API error responses
     - Display user-friendly error messages
     - Preserve form data on validation failure
     - _Requirements: 15.1, 15.6_
 
-  - [~] 21.4 Create validation utility functions
+  - [ ] 21.4 Create validation utility functions
     - Email format validation
     - Required field checking
     - Min/max length validation
@@ -614,24 +614,24 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 15.1_
 
 - [x] 22. Error handling and validation backend - Pydantic, response formats
-  - [~] 22.1 Create standardized error response format
+  - [ ] 22.1 Create standardized error response format
     - Define ErrorResponse schema with error, code, details, timestamp
     - Implement consistent error formatting
     - _Requirements: 12.6, 15.1_
 
-  - [~] 22.2 Implement input validation with Pydantic
+  - [ ] 22.2 Implement input validation with Pydantic
     - Create strict Pydantic models for all requests
     - Validate data types, required fields, constraints
     - Return 400 Bad Request with validation errors
     - _Requirements: 15.1, 15.2_
 
-  - [~] 22.3 Create custom validation rules
+  - [ ] 22.3 Create custom validation rules
     - Implement async validators for database constraints
     - Validate unique emails, project names, etc.
     - Return specific error messages
     - _Requirements: 8.1, 8.2_
 
-  - [~] 22.4 Implement exception handlers
+  - [ ] 22.4 Implement exception handlers
     - Create handlers for common exceptions
     - Return appropriate HTTP status codes
     - Log errors with context (never log passwords)
@@ -643,30 +643,30 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 15.1_
 
 - [x] 23. Security hardening - Input sanitization, CSRF, XSS, rate limiting
-  - [~] 23.1 Implement SQL injection prevention
+  - [ ] 23.1 Implement SQL injection prevention
     - Use SQLAlchemy ORM exclusively (no raw SQL)
     - Use parameterized queries for all database operations
     - _Requirements: 14.4_
 
-  - [~] 23.2 Implement XSS prevention
+  - [ ] 23.2 Implement XSS prevention
     - Sanitize all user input with DOMPurify on frontend
     - Use React's built-in XSS protection
     - Escape special characters in output
     - _Requirements: 14.5_
 
-  - [~] 23.3 Implement CSRF protection
+  - [ ] 23.3 Implement CSRF protection
     - Generate CSRF tokens on login
     - Validate tokens on state-changing requests
     - Return 403 for invalid CSRF tokens
     - _Requirements: 14.6_
 
-  - [~] 23.4 Implement rate limiting on authentication
+  - [ ] 23.4 Implement rate limiting on authentication
     - Limit login attempts to 5 per minute per IP
     - Implement exponential backoff after failed attempts
     - Return 429 Too Many Requests when limit exceeded
     - _Requirements: 14.8_
 
-  - [~] 23.5 Implement content security policy headers
+  - [ ] 23.5 Implement content security policy headers
     - Set CSP headers on all responses
     - Restrict script sources, style sources
     - _Requirements: 14.2_
@@ -677,29 +677,29 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 14.1_
 
 - [x] 24. API endpoints and documentation - Complete REST API, Swagger docs
-  - [~] 24.1 Create OpenAPI/Swagger documentation
+  - [ ] 24.1 Create OpenAPI/Swagger documentation
     - Generate Swagger/OpenAPI spec from FastAPI
     - Include request/response examples for all endpoints
     - Document error codes and status codes
     - _Requirements: 12.10_
 
-  - [~] 24.2 Implement API response pagination
+  - [ ] 24.2 Implement API response pagination
     - Add limit and offset parameters to list endpoints
     - Include total count in response metadata
     - Default limit: 50, max: 100
     - _Requirements: 12.7_
 
-  - [~] 24.3 Implement API sorting and filtering
+  - [ ] 24.3 Implement API sorting and filtering
     - Add sort_by, sort_order, filter parameters
     - Support filtering by multiple fields
     - _Requirements: 12.8_
 
-  - [~] 24.4 Implement response compression
+  - [ ] 24.4 Implement response compression
     - Enable gzip compression for responses >5MB
     - Compress JSON responses
     - _Requirements: 12.9_
 
-  - [~] 24.5 Create API client library for frontend
+  - [ ] 24.5 Create API client library for frontend
     - Generated or manual TypeScript client
     - Type-safe API calls
     - _Requirements: 12.1, 12.2_
@@ -710,42 +710,42 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 12.1_
 
 - [x] 25. Checkpoint - Core features complete
-  - [~] 25.1 Verify all CRUD operations work end-to-end
+  - [ ] 25.1 Verify all CRUD operations work end-to-end
     - Projects, resources, users, asset types
 
-  - [~] 25.2 Verify import pipeline works
+  - [ ] 25.2 Verify import pipeline works
     - Test Excel file import with sample data
 
-  - [~] 25.3 Verify RBAC enforcement
+  - [ ] 25.3 Verify RBAC enforcement
     - Test role-based access to different features
 
-  - [~] 25.4 Verify security measures are in place
+  - [ ] 25.4 Verify security measures are in place
     - Test HTTPS requirement, CSRF tokens, input sanitization
 
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 26. Reporting and export functionality - CSV, PDF export
-  - [~] 26.1 Create export service on backend
+  - [ ] 26.1 Create export service on backend
     - Implement CSV export for project and resource lists
     - Implement PDF export with headers, footers, formatting
     - _Requirements: 17.1, 17.2_
 
-  - [~] 26.2 Implement data filtering for export
+  - [ ] 26.2 Implement data filtering for export
     - Export current filtered dataset
     - Include all visible columns plus timestamp and exporter
     - _Requirements: 17.3, 17.4_
 
-  - [~] 26.3 Create chart export for PDF
+  - [ ] 26.3 Create chart export for PDF
     - Embed ECharts as images in PDF export
     - Include dashboard metrics and visualizations
     - _Requirements: 17.6_
 
-  - [~] 26.4 Create export buttons in frontend
+  - [ ] 26.4 Create export buttons in frontend
     - Add export functionality to list pages
     - Add dashboard chart export
     - _Requirements: 17.1_
 
-  - [~] 26.5 Implement export performance optimization
+  - [ ] 26.5 Implement export performance optimization
     - Complete exports for 10,000 records within 30 seconds
     - Stream large exports instead of loading into memory
     - _Requirements: 17.7_
@@ -756,22 +756,22 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 17.1_
 
 - [x] 27. Session management and idle timeout - Frontend implementation
-  - [~] 27.1 Implement session timeout warnings
+  - [ ] 27.1 Implement session timeout warnings
     - Show warning modal at 30-minute idle
     - Display countdown to auto-logout
     - _Requirements: 20.4_
 
-  - [~] 27.2 Implement auto-logout
+  - [ ] 27.2 Implement auto-logout
     - Auto-logout after 35-minute idle
     - Clear token and redirect to login
     - _Requirements: 20.5_
 
-  - [~] 27.3 Implement keep-alive mechanism
+  - [ ] 27.3 Implement keep-alive mechanism
     - Keep-alive request on user activity
     - Reset idle timer on each activity
     - _Requirements: 20.3, 20.4_
 
-  - [~] 27.4 Implement multiple session support
+  - [ ] 27.4 Implement multiple session support
     - Allow user to be logged in from multiple devices
     - Each session has independent token
     - _Requirements: 20.6_
@@ -782,34 +782,34 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 20.1_
 
 - [x] 28. UI/UX refinement - Responsive design, accessibility, polish
-  - [~] 28.1 Implement responsive design
+  - [ ] 28.1 Implement responsive design
     - Test on desktop (1024px), tablet, mobile (375px)
     - Ensure all functions accessible on all screen sizes
     - _Requirements: 16.1_
 
-  - [~] 28.2 Implement accessibility features
+  - [ ] 28.2 Implement accessibility features
     - Add ARIA labels to all interactive elements
     - Ensure proper heading hierarchy
     - Add alt text to images
     - Support keyboard navigation
     - _Requirements: 16.7, 16.8_
 
-  - [~] 28.3 Add loading indicators and skeletons
+  - [ ] 28.3 Add loading indicators and skeletons
     - Display loading skeleton while data fetches
     - Show progress indicators during imports
     - _Requirements: 16.9_
 
-  - [~] 28.4 Implement tooltips and help
+  - [ ] 28.4 Implement tooltips and help
     - Add tooltips to complex UI elements
     - Add help section in main menu
     - _Requirements: 16.6, 16.10_
 
-  - [~] 28.5 Add consistent status indicators
+  - [ ] 28.5 Add consistent status indicators
     - Color-code status: Active/green, Pending/yellow, Completed/blue, On Hold/gray
     - Display status badges consistently
     - _Requirements: 1.7, 16.5_
 
-  - [~] 28.6 Implement navigation consistency
+  - [ ] 28.6 Implement navigation consistency
     - Accessible main menu within 2 clicks
     - Consistent navigation across pages
     - _Requirements: 16.2, 16.3_
@@ -820,29 +820,29 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 16.1_
 
 - [x] 29. Performance optimization - Caching, indexing, optimization
-  - [~] 29.1 Implement database query caching
+  - [ ] 29.1 Implement database query caching
     - Cache asset type schemas with 24-hour TTL
     - Cache user permissions with 1-hour TTL
     - Invalidate caches on updates
     - _Requirements: 13.6_
 
-  - [~] 29.2 Implement API response caching
+  - [ ] 29.2 Implement API response caching
     - Cache dashboard metrics with 30-second TTL
     - Cache project lists with 5-minute TTL
     - Implement cache invalidation on mutations
     - _Requirements: 13.6, 2.6_
 
-  - [~] 29.3 Verify database indexing is optimal
+  - [ ] 29.3 Verify database indexing is optimal
     - Verify all necessary indexes exist
     - Analyze slow queries (>1 second)
     - _Requirements: 13.5, 19.5_
 
-  - [~] 29.4 Implement frontend code splitting
+  - [ ] 29.4 Implement frontend code splitting
     - Split routes into separate chunks
     - Lazy load components
     - _Requirements: 13.1_
 
-  - [~] 29.5 Implement frontend image optimization
+  - [ ] 29.5 Implement frontend image optimization
     - Use WebP format with fallbacks
     - Lazy load images
     - _Requirements: 13.1_
@@ -853,30 +853,30 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 13.1_
 
 - [x] 30. Final integration and testing - Full system validation
-  - [~] 30.1 Run all property-based tests
+  - [ ] 30.1 Run all property-based tests
     - Execute all 24 correctness properties
     - Verify all properties pass
     - _Requirements: 11.1_
 
-  - [~] 30.2 Run full integration test suite
+  - [ ] 30.2 Run full integration test suite
     - Test complete workflows end-to-end
     - Test import pipeline with realistic data
     - Test concurrent user scenarios
     - _Requirements: 13.1, 13.4_
 
-  - [~] 30.3 Verify deployment readiness
+  - [ ] 30.3 Verify deployment readiness
     - Check environment configuration
     - Test health check endpoints
     - Verify logging and monitoring
     - _Requirements: 13.1, 19.1_
 
-  - [~] 30.4 Verify documentation completeness
+  - [ ] 30.4 Verify documentation completeness
     - API documentation with Swagger
     - Database schema documentation
     - Deployment guide
     - _Requirements: 12.10_
 
-  - [~] 30.5 Performance and load testing
+  - [ ] 30.5 Performance and load testing
     - Verify 100 concurrent users supported
     - Verify performance meets all timing requirements
     - _Requirements: 13.2, 13.4_
@@ -887,23 +887,23 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 13.1_
 
 - [x] 31. Enhanced audit logging - Multiple operation types and compliance
-  - [~] 31.1 Create extended AuditLog schema
+  - [ ] 31.1 Create extended AuditLog schema
     - Add fields: ip_address, user_agent, status, error_message, execution_time_ms
     - Support operation types: LOGIN, LOGOUT, IMPORT, EXPORT, REPORT_DOWNLOAD, ROLE_CHANGE
     - _Requirements: 19.1, 19.2_
 
-  - [~] 31.2 Implement audit logging for all operations
+  - [ ] 31.2 Implement audit logging for all operations
     - Add middleware to capture login/logout events
     - Add decorators to capture import/export operations
     - Log role changes with old/new values
     - _Requirements: 19.1_
 
-  - [~] 31.3 Create compliance report generation
+  - [ ] 31.3 Create compliance report generation
     - Generate audit reports by date range, user, operation type
     - Export audit logs with filters
     - _Requirements: 19.3, 19.4_
 
-  - [~] 31.4 Implement audit log protection
+  - [ ] 31.4 Implement audit log protection
     - Encrypt sensitive audit data at rest
     - Enforce immutability (prevent modification)
     - Admin-only access to audit logs
@@ -915,25 +915,25 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 19.1_
 
 - [x] 32. Notification system - Backend service
-  - [~] 32.1 Create Notification model and service
+  - [ ] 32.1 Create Notification model and service
     - Create notifications table with type, priority, status
     - Implement notification creation service
     - _Requirements: 21.1, 21.2, 21.3_
 
-  - [~] 32.2 Implement notification triggers
+  - [ ] 32.2 Implement notification triggers
     - Budget threshold reached (80%, 100%)
     - Warranty expiring (30 days)
     - Import failed/completed
     - Project delayed
     - _Requirements: 21.1, 21.4, 21.5_
 
-  - [~] 32.3 Create notification delivery service
+  - [ ] 32.3 Create notification delivery service
     - In-app notifications (database)
     - Email notifications (async queue)
     - Retry logic with exponential backoff
     - _Requirements: 21.6, 21.8_
 
-  - [~] 32.4 Create notification endpoints
+  - [ ] 32.4 Create notification endpoints
     - GET /api/notifications - List unread notifications
     - PUT /api/notifications/{id}/read - Mark as read
     - DELETE /api/notifications/{id} - Dismiss notification
@@ -947,19 +947,19 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 21.1_
 
 - [x] 33. Notification system - Frontend UI
-  - [~] 33.1 Create notification components
+  - [ ] 33.1 Create notification components
     - Toast notification component (temporary)
     - Notification center component (permanent)
     - Notification badge (unread count)
     - _Requirements: 21.6, 21.7_
 
-  - [~] 33.2 Implement notification polling
+  - [ ] 33.2 Implement notification polling
     - Poll /api/notifications every 30 seconds
     - Display new notifications in real-time
     - Mark as read when viewed
     - _Requirements: 21.7_
 
-  - [~] 33.3 Create notification preference UI
+  - [ ] 33.3 Create notification preference UI
     - Settings page for notification types
     - Toggle delivery channels (in-app, email)
     - _Requirements: 21.8_
@@ -970,24 +970,24 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 21.1_
 
 - [x] 34. JSONB optimization - Custom fields
-  - [~] 34.1 Update database schema to use JSONB
+  - [ ] 34.1 Update database schema to use JSONB
     - Modify resources.custom_field_values to JSONB
     - Modify custom_fields.options to JSONB
     - Modify custom_fields.validation_rules to JSONB
     - _Requirements: 24.1, 24.2_
 
-  - [~] 34.2 Create GIN indexes on JSONB columns
+  - [ ] 34.2 Create GIN indexes on JSONB columns
     - Create GIN index on resources.custom_field_values
     - Create GIN indexes on frequently queried paths
     - _Requirements: 24.3, 24.4_
 
-  - [~] 34.3 Implement JSONB query builders
+  - [ ] 34.3 Implement JSONB query builders
     - Create utilities for JSONB @> operator (contains)
     - Create utilities for JSONB -> operator (extract)
     - Create utilities for JSONB ->> operator (extract text)
     - _Requirements: 24.6_
 
-  - [~] 34.4 Optimize resource filtering
+  - [ ] 34.4 Optimize resource filtering
     - Update resource filter endpoints to use JSONB operators
     - Test performance (<1 second for 100k records)
     - _Requirements: 24.4, 24.5_
@@ -998,19 +998,19 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 24.4_
 
 - [x] 35. Reporting engine - Backend service
-  - [~] 35.1 Create report template system
+  - [ ] 35.1 Create report template system
     - Create report_templates table with versioning
     - Implement template CRUD endpoints
     - Support template parameters
     - _Requirements: 23.1, 23.2_
 
-  - [~] 35.2 Create report generation service
+  - [ ] 35.2 Create report generation service
     - Implement report rendering pipeline
     - Support section types: summary, table, chart, recommendation
     - Execute queries and AI agents for each section
     - _Requirements: 23.3, 23.4_
 
-  - [~] 35.3 Implement report export formats
+  - [ ] 35.3 Implement report export formats
     - PDF export with charts, headers, footers
     - XLSX export with multiple sheets
     - DOCX export with formatted sections
@@ -1018,13 +1018,13 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - HTML export for web viewing
     - _Requirements: 23.3, 23.4, 23.5_
 
-  - [~] 35.4 Create report scheduling service
+  - [ ] 35.4 Create report scheduling service
     - Schedule recurring reports (daily, weekly, monthly)
     - Implement report queue/job processing
     - Send email with report attachment
     - _Requirements: 23.8_
 
-  - [~] 35.5 Create report endpoints
+  - [ ] 35.5 Create report endpoints
     - GET /api/reports/templates - List templates
     - POST /api/reports/generate - Generate report on-demand
     - POST /api/reports/schedule - Schedule recurring report
@@ -1038,23 +1038,23 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 23.3_
 
 - [x] 36. Reporting engine - Frontend UI
-  - [~] 36.1 Create report template selection UI
+  - [ ] 36.1 Create report template selection UI
     - Display available templates
     - Show template parameters for user input
     - _Requirements: 23.1, 23.2_
 
-  - [~] 36.2 Create report generation and download UI
+  - [ ] 36.2 Create report generation and download UI
     - Generate report on-demand
     - Show generation progress
     - Provide download link when ready
     - _Requirements: 23.2, 23.3_
 
-  - [~] 36.3 Create report scheduling UI
+  - [ ] 36.3 Create report scheduling UI
     - Schedule recurring reports
     - Specify recipients and format
     - _Requirements: 23.8_
 
-  - [~] 36.4 Create report management UI
+  - [ ] 36.4 Create report management UI
     - List previously generated reports
     - Download/delete reports
     - View report metadata
@@ -1066,26 +1066,26 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 23.1_
 
 - [x] 37. AI/NLQ service layer - Setup and infrastructure
-  - [~] 37.1 Set up LLM service integration
+  - [ ] 37.1 Set up LLM service integration
     - Configure LLM provider (OpenAI/Anthropic/self-hosted)
     - Create LLM client with error handling
     - Implement retry logic and fallback
     - _Requirements: 22.1, 22.2_
 
-  - [~] 37.2 Implement SQL agent
+  - [ ] 37.2 Implement SQL agent
     - Parse natural language queries
     - Generate SELECT-only SQL queries
     - Validate queries (no INSERT/UPDATE/DELETE)
     - Execute and return results
     - _Requirements: 22.1, 22.2_
 
-  - [~] 37.3 Implement schema context provider
+  - [ ] 37.3 Implement schema context provider
     - Dynamically build schema description for LLM
     - Include table names, column names, relationships
     - Update schema context on entity changes
     - _Requirements: 22.7_
 
-  - [~] 37.4 Create query safety validator
+  - [ ] 37.4 Create query safety validator
     - Validate only SELECT queries allowed
     - Sanitize query results (remove sensitive data)
     - Implement query timeouts
@@ -1097,25 +1097,25 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 22.1_
 
 - [x] 38. AI/RAG pipeline - Embeddings and retrieval
-  - [~] 38.1 Implement embedding service
+  - [ ] 38.1 Implement embedding service
     - Create embeddings for resources, queries, patterns
     - Use OpenAI embedding API or self-hosted
     - Cache embeddings in PostgreSQL
     - _Requirements: 22.5, 22.8_
 
-  - [~] 38.2 Create RAG search service
+  - [ ] 38.2 Create RAG search service
     - Search for similar historical queries
     - Find related resources by embedding similarity
     - Return top-K matches with scores
     - _Requirements: 22.5, 22.6_
 
-  - [~] 38.3 Implement embedding cache and refresh
+  - [ ] 38.3 Implement embedding cache and refresh
     - Store embeddings in embedding_cache table
     - Expire and refresh embeddings periodically
     - Implement efficient vector search
     - _Requirements: 22.8_
 
-  - [~] 38.4 Create report agent
+  - [ ] 38.4 Create report agent
     - Generate insights from query results
     - Generate recommendations for optimization
     - Generate forecasts from historical data
@@ -1127,24 +1127,24 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 22.5_
 
 - [x] 39. AI/NLQ frontend - Natural language query interface
-  - [~] 39.1 Create NLQ query interface
+  - [ ] 39.1 Create NLQ query interface
     - Text input for natural language queries
     - Query suggestions from saved templates
     - _Requirements: 22.1_
 
-  - [~] 39.2 Implement query execution UI
+  - [ ] 39.2 Implement query execution UI
     - Submit query to /api/ai/query endpoint
     - Display results in table/chart format
     - Show execution time and query used
     - _Requirements: 22.2, 22.3_
 
-  - [~] 39.3 Create insights panel
+  - [ ] 39.3 Create insights panel
     - Display AI-generated insights below results
     - Show recommendations for optimization
     - Show forecast predictions
     - _Requirements: 22.9, 22.10_
 
-  - [~] 39.4 Implement query history and templates
+  - [ ] 39.4 Implement query history and templates
     - Save successful queries as templates
     - Show query history
     - Allow reuse of saved queries
@@ -1156,49 +1156,49 @@ The PRMS implementation follows a multi-layered architecture with FastAPI backen
     - _Requirements: 22.1_
 
 - [x] 40. Checkpoint 3 - Enterprise features complete
-  - [~] 40.1 Verify notification system works end-to-end
+  - [ ] 40.1 Verify notification system works end-to-end
     - Test budget threshold notification
     - Test warranty expiring notification
     - Test import failure notification
 
-  - [~] 40.2 Verify reporting engine
+  - [ ] 40.2 Verify reporting engine
     - Generate report in each format (PDF, XLSX, DOCX)
     - Verify scheduled reports work
 
-  - [~] 40.3 Verify JSONB performance
+  - [ ] 40.3 Verify JSONB performance
     - Test filtering by custom fields is <1 second
     - Verify GIN indexes are being used
 
-  - [~] 40.4 Verify AI/NLQ system
+  - [ ] 40.4 Verify AI/NLQ system
     - Test natural language query translation
     - Test RAG retrieval
     - Test report generation with AI insights
 
-  - [~] 40.5 Verify enhanced audit logging
+  - [ ] 40.5 Verify enhanced audit logging
     - Verify all operation types logged
     - Verify compliance report generation
 
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 41. Final checkpoint - System complete with enterprise features
-  - [~] 41.1 Verify all 24 requirements implemented
+  - [ ] 41.1 Verify all 24 requirements implemented
     - Check off each requirement against implementation
 
-  - [~] 41.2 Verify all tests pass
+  - [ ] 41.2 Verify all tests pass
     - Unit tests, property tests, integration tests
 
-  - [~] 41.3 Verify performance metrics
+  - [ ] 41.3 Verify performance metrics
     - Dashboard <2 seconds
     - Search <1 second
     - JSONB queries <1 second for 100k records
     - Concurrent users: 100+
 
-  - [~] 41.4 Verify compliance requirements
+  - [ ] 41.4 Verify compliance requirements
     - All operations logged
     - 24-month audit trail maintained
     - Sensitive data protected
 
-  - [~] 41.5 Verify AI/reporting features
+  - [ ] 41.5 Verify AI/reporting features
     - Natural language queries work
     - Reports generate in all formats
     - Notifications deliver reliably

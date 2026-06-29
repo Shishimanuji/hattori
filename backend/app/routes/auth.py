@@ -146,6 +146,14 @@ async def login(
         from app.core.config import settings
         expires_in = settings.access_token_expire_hours * 3600
         
+        # Get user role safely - handle both string and object
+        user_role = "Viewer"  # Default role
+        try:
+            if hasattr(user, 'role') and user.role:
+                user_role = user.role.role_name if hasattr(user.role, 'role_name') else str(user.role)
+        except Exception as e:
+            logger.warning(f"Could not retrieve user role: {str(e)}")
+        
         return LoginResponse(
             access_token=token,
             token_type="bearer",
@@ -154,7 +162,7 @@ async def login(
                 id=user.id,
                 username=user.username,
                 email=user.email,
-                role=user.role,
+                role=user_role,
                 is_active=user.is_active,
                 created_at=user.created_at,
             ),

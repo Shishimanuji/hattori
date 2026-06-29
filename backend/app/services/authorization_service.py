@@ -35,7 +35,9 @@ class AuthorizationService:
         Returns:
             True if user can create projects
         """
-        return user.role in [UserRole.ADMIN, UserRole.MANAGER]
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Project Manager"]
     
     @staticmethod
     def can_edit_project(user: User, project: Project) -> bool:
@@ -55,9 +57,12 @@ class AuthorizationService:
         Returns:
             True if user can edit project
         """
-        if user.role == UserRole.ADMIN:
+        if not user.role:
+            return False
+            
+        if user.role.role_name == "Admin":
             return True
-        if user.role == UserRole.MANAGER:
+        if user.role.role_name == "Project Manager":
             return str(user.id) == str(project.owner_id)
         return False
     
@@ -100,10 +105,13 @@ class AuthorizationService:
         Returns:
             True if user can view project
         """
-        if user.role in [UserRole.ADMIN, UserRole.MANAGER, UserRole.ANALYST]:
+        if not user.role:
+            return False
+            
+        if user.role.role_name in ["Admin", "Project Manager", "Engineer"]:
             return True
         
-        if user.role == UserRole.VIEWER:
+        if user.role.role_name == "Viewer":
             # Viewers see only assigned projects
             # Check if user has assigned_projects attribute (for testing)
             if hasattr(user, 'assigned_projects') and user.assigned_projects:
@@ -140,19 +148,22 @@ class AuthorizationService:
         # Exclude soft-deleted projects for all users
         query = query.filter(Project.deleted_at == None)
         
-        if user.role == UserRole.ADMIN:
+        if not user.role:
+            return query.filter(Project.id == None)  # No access
+        
+        if user.role.role_name == "Admin":
             # Admins see all active projects
             return query
         
-        if user.role == UserRole.MANAGER:
+        if user.role.role_name == "Project Manager":
             # Managers see all active projects (but can only edit their own)
             return query
         
-        if user.role == UserRole.ANALYST:
-            # Analysts see all active projects (read-only)
+        if user.role.role_name in ["Engineer", "Auditor"]:
+            # Engineers and Auditors see all active projects (read-only)
             return query
         
-        if user.role == UserRole.VIEWER:
+        if user.role.role_name == "Viewer":
             # Viewers see only assigned projects
             # Check if user_id exists in assigned_projects list (for future enhancement)
             # For now, filter to a specific list if assigned_projects is populated
@@ -180,7 +191,9 @@ class AuthorizationService:
         Returns:
             True if user can create resources
         """
-        return user.role in [UserRole.ADMIN, UserRole.MANAGER]
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Project Manager"]
     
     @staticmethod
     def can_edit_resource(user: User, resource: Resource, project: Project) -> bool:
@@ -201,9 +214,12 @@ class AuthorizationService:
         Returns:
             True if user can edit resource
         """
-        if user.role == UserRole.ADMIN:
+        if not user.role:
+            return False
+            
+        if user.role.role_name == "Admin":
             return True
-        if user.role == UserRole.MANAGER:
+        if user.role.role_name == "Project Manager":
             return str(user.id) == str(project.owner_id)
         return False
     
@@ -247,16 +263,19 @@ class AuthorizationService:
         Returns:
             True if user can view resource
         """
-        if user.role == UserRole.ADMIN:
+        if not user.role:
+            return False
+            
+        if user.role.role_name == "Admin":
             return True
         
-        if user.role == UserRole.MANAGER:
+        if user.role.role_name == "Project Manager":
             return str(user.id) == str(project.owner_id)
         
-        if user.role == UserRole.ANALYST:
+        if user.role.role_name in ["Engineer", "Auditor"]:
             return True
         
-        if user.role == UserRole.VIEWER:
+        if user.role.role_name == "Viewer":
             # Viewers can only view resources in assigned projects
             if hasattr(user, 'assigned_projects') and user.assigned_projects:
                 return resource.project_id in user.assigned_projects
@@ -295,11 +314,14 @@ class AuthorizationService:
         # Exclude soft-deleted resources for all users
         query = query.filter(Resource.deleted_at == None)
         
-        if user.role == UserRole.ADMIN:
+        if not user.role:
+            return query.filter(Resource.id == None)  # No access
+        
+        if user.role.role_name == "Admin":
             # Admins see all active resources
             return query
         
-        if user.role == UserRole.MANAGER:
+        if user.role.role_name == "Project Manager":
             # Managers see resources only in their projects (projects they own)
             manager_projects = db.query(Project.id).filter(
                 Project.owner_id == user.id,
@@ -308,11 +330,11 @@ class AuthorizationService:
             query = query.filter(Resource.project_id.in_(manager_projects))
             return query
         
-        if user.role == UserRole.ANALYST:
-            # Analysts see all active resources (read-only)
+        if user.role.role_name in ["Engineer", "Auditor"]:
+            # Engineers and Auditors see all active resources (read-only)
             return query
         
-        if user.role == UserRole.VIEWER:
+        if user.role.role_name == "Viewer":
             # Viewers see resources only in assigned projects
             # Check if user has assigned_projects
             if hasattr(user, 'assigned_projects') and user.assigned_projects:
@@ -324,6 +346,176 @@ class AuthorizationService:
         
         return query.filter(Resource.id == None)  # No access
     
+    # ==================== Asset Authorization ====================
+    
+    @staticmethod
+    def can_create_asset(user: User) -> bool:
+        """
+        Check if user can create assets.
+        
+        Allowed roles: Admin, Manager
+        
+        Args:
+            user: Current user
+            
+        Returns:
+            True if user can create assets
+        """
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Project Manager"]
+    
+    @staticmethod
+    def can_edit_asset(user: User, asset, project: Project) -> bool:
+        """
+        Check if user can edit an asset.
+        
+        Rules:
+        - Admin: Can edit any asset
+        - Manager: Can edit assets in own projects
+        - Others: Cannot edit
+        
+        Args:
+            user: Current user
+            asset: Asset to check
+            project: Project containing asset
+            
+        Returns:
+            True if user can edit asset
+        """
+        if not user.role:
+            return False
+            
+        if user.role.role_name == "Admin":
+            return True
+        if user.role.role_name == "Project Manager":
+            return str(user.id) == str(project.owner_id)
+        return False
+    
+    @staticmethod
+    def can_delete_asset(user: User, asset, project: Project) -> bool:
+        """
+        Check if user can delete an asset.
+        
+        Rules: Same as edit
+        
+        Args:
+            user: Current user
+            asset: Asset to check
+            project: Project containing asset
+            
+        Returns:
+            True if user can delete asset
+        """
+        return AuthorizationService.can_edit_asset(user, asset, project)
+    
+    @staticmethod
+    def can_view_asset(
+        user: User,
+        asset,
+        project: Project = None,
+    ) -> bool:
+        """
+        Check if user can view an asset.
+        
+        Rules:
+        - Admin: Can view all assets
+        - Manager: Can view assets in accessible projects
+        - Others: Can view all assets (read-only)
+        - Viewer: Can view assets in assigned projects only
+        
+        Args:
+            user: Current user
+            asset: Asset to check
+            project: Project containing asset (optional)
+            
+        Returns:
+            True if user can view asset
+        """
+        if not user.role:
+            return False
+            
+        if user.role.role_name == "Admin":
+            return True
+        
+        if user.role.role_name == "Project Manager":
+            if project:
+                return str(user.id) == str(project.owner_id)
+            else:
+                return True  # Can view all assets, edit only own projects
+        
+        if user.role.role_name in ["Engineer", "Auditor"]:
+            return True
+        
+        if user.role.role_name == "Viewer":
+            # Viewers can only view assets in assigned projects
+            if hasattr(user, 'assigned_projects') and user.assigned_projects and project:
+                return project.id in user.assigned_projects
+            else:
+                return False
+        
+        return False
+    
+    @staticmethod
+    def filter_viewable_assets(
+        user: User,
+        query,
+        db: Optional[Session] = None,
+    ):
+        """
+        Filter asset query based on user's viewable assets.
+        
+        Rules:
+        - Admin: All active assets
+        - Manager: All assets (can edit only in own projects)
+        - Others: All active assets (read-only)
+        - Viewer: Assets in assigned projects only
+        
+        Args:
+            user: Current user
+            query: SQLAlchemy query
+            db: Database session (required)
+            
+        Returns:
+            Filtered query
+        """
+        if db is None:
+            # Cannot filter without database session
+            from app.models.asset import Asset
+            return query.filter(Asset.id == None)
+        
+        # Exclude soft-deleted assets for all users
+        from app.models.asset import Asset
+        query = query.filter(Asset.deleted_at == None)
+        
+        if not user.role:
+            return query.filter(Asset.id == None)  # No access
+        
+        if user.role.role_name == "Admin":
+            # Admins see all active assets
+            return query
+        
+        if user.role.role_name == "Project Manager":
+            # Managers see all active assets (but can only edit those in their projects)
+            return query
+        
+        if user.role.role_name in ["Engineer", "Auditor"]:
+            # Engineers and Auditors see all active assets (read-only)
+            return query
+        
+        if user.role.role_name == "Viewer":
+            # Viewers see assets only in assigned projects
+            # Check if user has assigned_projects
+            if hasattr(user, 'assigned_projects') and user.assigned_projects:
+                # Join with projects to filter by assigned projects
+                query = query.join(Project).filter(Project.id.in_(user.assigned_projects))
+                return query
+            else:
+                # No assigned projects means no access
+                return query.filter(Asset.id == None)  # Returns empty result
+        
+        return query.filter(Asset.id == None)  # No access
+
     # ==================== Import Authorization ====================
     
     @staticmethod
@@ -339,7 +531,9 @@ class AuthorizationService:
         Returns:
             True if user can import
         """
-        return user.role in [UserRole.ADMIN, UserRole.MANAGER]
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Project Manager"]
     
     # ==================== Asset Type Authorization ====================
     
@@ -356,7 +550,9 @@ class AuthorizationService:
         Returns:
             True if user can manage asset types
         """
-        return user.role == UserRole.ADMIN
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Super Admin"]
     
     # ==================== User Management Authorization ====================
     
@@ -373,7 +569,9 @@ class AuthorizationService:
         Returns:
             True if user can manage users
         """
-        return user.role == UserRole.ADMIN
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Super Admin"]
     
     # ==================== Audit Log Authorization ====================
     
@@ -390,7 +588,9 @@ class AuthorizationService:
         Returns:
             True if user can view audit logs
         """
-        return user.role == UserRole.ADMIN
+        if not user.role:
+            return False
+        return user.role.role_name in ["Admin", "Super Admin"]
     
     # ==================== Dashboard Authorization ====================
     
@@ -408,11 +608,15 @@ class AuthorizationService:
             True if user can access dashboard
         """
         # All authenticated users can view dashboard
-        return user.role in [
-            UserRole.ADMIN,
-            UserRole.MANAGER,
-            UserRole.ANALYST,
-            UserRole.VIEWER
+        if not user.role:
+            return False
+        return user.role.role_name in [
+            "Admin",
+            "Super Admin", 
+            "Project Manager",
+            "Engineer",
+            "Auditor",
+            "Viewer"
         ]
     
     # ==================== Summary Authorization Methods ====================
@@ -428,8 +632,10 @@ class AuthorizationService:
         Returns:
             Dictionary with permission summary
         """
+        role_name = user.role.role_name if user.role else "No Role"
+        
         return {
-            "role": user.role,
+            "role": role_name,
             "can_create_project": AuthorizationService.can_create_project(user),
             "can_manage_users": AuthorizationService.can_manage_users(user),
             "can_manage_asset_types": AuthorizationService.can_manage_asset_types(user),

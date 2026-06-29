@@ -7,7 +7,10 @@ import logging
 
 from app.core.config import settings
 from app.core.database import init_db, create_all_tables, get_db
-from app.routes import auth, users, projects, dashboard, asset_types, resources
+from app.routes import (
+    auth, users, projects, dashboard, asset_types, resources,
+    templates, assets, resource_types
+)
 from app.utils.jwt_utils import verify_token
 from app.utils.exceptions import InvalidTokenException, TokenExpiredException, MissingTokenException
 
@@ -74,13 +77,18 @@ async def health_check():
     }
 
 
-# API V1 routes - will be added as routes are implemented
+# API V1 routes
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(projects.router)
 app.include_router(resources.router)
 app.include_router(dashboard.router)
 app.include_router(asset_types.router)
+
+# New routes for redesigned schema
+app.include_router(templates.router)
+app.include_router(assets.router)
+app.include_router(resource_types.router)
 
 @app.get(f"{settings.api_v1_prefix}/", tags=["Root"])
 async def root():
@@ -108,7 +116,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=8001,
         reload=settings.debug,
         log_level="info",
     )

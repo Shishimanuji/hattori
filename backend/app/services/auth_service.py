@@ -173,4 +173,7 @@ class AuthService:
             user_agent=user_agent
         )
         
+        # Refresh session to ensure user relationship is loaded
+        db.refresh(session)
+        
         return token, session

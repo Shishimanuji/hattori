@@ -27,12 +27,12 @@ from app.core.config import settings
 
 @pytest.fixture
 def test_user(db: DBSession):
-    \"\"\"Create a test user\"\"\"
+    """Create a test user"""
     user = User(
         id=uuid.uuid4(),
-        username=\"testuser\",
-        email=\"test@example.com\",
-        password_hash=AuthUtils.hash_password(\"testpass123\"),
+        username="testuser",
+        email="test@example.com",
+        password_hash=AuthUtils.hash_password("testpass123"),
         role=UserRole.MANAGER,
         is_active=True
     )

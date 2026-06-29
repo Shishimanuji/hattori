@@ -579,3 +579,35 @@ def validate_boolean_field(
         )
     
     return errors
+
+
+class ValidationService:
+    """Service for validating Excel imports and custom fields"""
+    
+    @staticmethod
+    def validate_asset_fields(asset_type: AssetType, field_values: Dict[str, Any]) -> ValidationResult:
+        """Validate asset custom fields against asset type schema
+        
+        Args:
+            asset_type: AssetType model with field definitions
+            field_values: Dictionary of field values to validate
+            
+        Returns:
+            ValidationResult with validation status and errors
+        """
+        validator = SchemaValidator(asset_type)
+        return validator.validate(field_values)
+    
+    @staticmethod
+    def validate_excel_row(asset_type: AssetType, row_data: Dict[str, Any]) -> ValidationResult:
+        """Validate a single Excel row against asset type schema
+        
+        Args:
+            asset_type: AssetType model with field definitions
+            row_data: Dictionary of row data from Excel
+            
+        Returns:
+            ValidationResult with validation status and errors
+        """
+        validator = SchemaValidator(asset_type)
+        return validator.validate(row_data)

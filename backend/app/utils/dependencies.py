@@ -1,6 +1,6 @@
 """Dependency functions for FastAPI routes"""
 from fastapi import Depends, HTTPException, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import Optional
 import logging
 
@@ -59,8 +59,8 @@ async def get_current_user(
         logger.warning("Token missing user ID claim")
         raise HTTPException(status_code=401, detail="Invalid token claims")
     
-    # Get user from database
-    user = db.query(User).filter(User.id == user_id).first()
+    # Get user from database with role relationship
+    user = db.query(User).options(joinedload(User.role)).filter(User.id == user_id).first()
     
     if not user:
         logger.warning(f"User not found for token user_id: {user_id}")
@@ -139,9 +139,7 @@ async def get_current_admin_user(
     Raises:
         HTTPException: 403 if user is not admin
     """
-    from app.models.user import UserRole
-    
-    if current_user.role != UserRole.ADMIN:
+    if not current_user.role or current_user.role.role_name not in ["Admin", "Super Admin"]:
         logger.warning(f"Non-admin user attempted to access admin endpoint: {current_user.id}")
         raise HTTPException(status_code=403, detail="Admin privileges required")
     
@@ -163,9 +161,7 @@ async def get_current_manager_user(
     Raises:
         HTTPException: 403 if user is not manager or admin
     """
-    from app.models.user import UserRole
-    
-    if current_user.role not in (UserRole.MANAGER, UserRole.ADMIN):
+    if not current_user.role or current_user.role.role_name not in ["Project Manager", "Admin", "Super Admin"]:
         logger.warning(f"Non-manager user attempted to access manager endpoint: {current_user.id}")
         raise HTTPException(status_code=403, detail="Manager privileges required")
     

@@ -303,7 +303,7 @@ class DashboardService:
             "user": {
                 "id": str(current_user.id),
                 "username": current_user.username,
-                "role": current_user.role,
+                "role": current_user.role.role_name if current_user.role else "No Role",
             },
             "projects": DashboardService.get_project_overview(db, current_user),
             "resources": DashboardService.get_resource_distribution(db, current_user),

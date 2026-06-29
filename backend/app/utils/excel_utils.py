@@ -13,6 +13,16 @@ class ExcelParsingError(Exception):
     pass
 
 
+class ExcelValidationError(Exception):
+    """Exception raised during Excel file validation"""
+    pass
+
+
+class ExcelFormatError(Exception):
+    """Exception raised when Excel file format is invalid"""
+    pass
+
+
 class ExcelParser:
     """Utility class for parsing Excel files"""
     
@@ -164,3 +174,96 @@ class ExcelParser:
                 return field
         
         return None
+
+
+def validate_excel_file(file_content: bytes, filename: str) -> Tuple[List[str], List[Dict[str, Any]], int]:
+    """
+    Validate and parse an Excel file.
+    
+    Args:
+        file_content: Binary content of Excel file
+        filename: Name of the uploaded file
+        
+    Returns:
+        Tuple of (headers, rows, total_rows)
+        
+    Raises:
+        ExcelParsingError: If file is invalid or cannot be parsed
+    """
+    # Validate file format
+    ExcelParser.validate_file_format(filename)
+    
+    # Read and parse file
+    return ExcelParser.read_excel_file(file_content)
+
+
+# Module-level functions for backward compatibility
+def read_excel_file(file_content: bytes) -> Tuple[List[str], List[Dict[str, Any]], int]:
+    """Read Excel file - module-level function"""
+    return ExcelParser.read_excel_file(file_content)
+
+
+def parse_excel_data(file_content: bytes, filename: str) -> Dict[str, Any]:
+    """Parse Excel data from file content"""
+    ExcelParser.validate_file_format(filename)
+    headers, rows, total_rows = ExcelParser.read_excel_file(file_content)
+    return {
+        "headers": headers,
+        "rows": rows,
+        "total_rows": total_rows,
+    }
+
+
+def get_sheet_names(file_content: bytes) -> List[str]:
+    """Get list of sheet names from Excel file"""
+    try:
+        file_obj = BytesIO(file_content)
+        workbook = openpyxl.load_workbook(file_obj)
+        sheet_names = workbook.sheetnames
+        workbook.close()
+        return sheet_names
+    except Exception as e:
+        raise ExcelParsingError(f"Failed to get sheet names: {str(e)}")
+
+
+def get_sheet_preview(file_content: bytes, sheet_name: str = None, max_rows: int = 10) -> Dict[str, Any]:
+    """Get preview of a specific sheet"""
+    try:
+        file_obj = BytesIO(file_content)
+        workbook = openpyxl.load_workbook(file_obj, data_only=True)
+        
+        if sheet_name:
+            sheet = workbook[sheet_name]
+        else:
+            sheet = workbook.active
+        
+        # Get headers
+        headers = []
+        for cell in sheet[1]:
+            value = cell.value
+            if value is not None:
+                headers.append(str(value).strip())
+            else:
+                headers.append("")
+        
+        # Get preview rows
+        rows = []
+        for row_idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
+            if row_idx - 1 >= max_rows:
+                break
+            row_data = {}
+            for col_idx, value in enumerate(row):
+                if col_idx < len(headers) and headers[col_idx]:
+                    row_data[headers[col_idx]] = value
+            if any(v is not None for v in row_data.values()):
+                rows.append(row_data)
+        
+        workbook.close()
+        
+        return {
+            "headers": headers,
+            "rows": rows,
+            "sheet_name": sheet_name or sheet.title,
+        }
+    except Exception as e:
+        raise ExcelParsingError(f"Failed to get sheet preview: {str(e)}")
