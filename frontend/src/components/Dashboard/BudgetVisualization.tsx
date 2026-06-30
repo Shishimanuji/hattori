@@ -26,7 +26,7 @@ interface BudgetVisualizationProps {
 }
 
 const formatCurrency = (amount: number) => {
-  return `$${amount.toLocaleString('en-US', {
+  return `₹${(amount * 83).toLocaleString('en-IN', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   })}`

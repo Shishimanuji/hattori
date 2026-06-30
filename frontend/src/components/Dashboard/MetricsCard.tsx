@@ -43,25 +43,25 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
   }
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 p-3 ${className}`}>
+    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm p-3 ${className}`}>
       {/* Header with icon and title */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-medium text-gray-600">{title}</h3>
+        <h3 className="text-xs font-semibold text-gray-600">{title}</h3>
         {icon && <div className="text-gray-400">{icon}</div>}
       </div>
 
       {/* Main value */}
       <div className="mb-1">
-        <p className="text-xl font-bold text-gray-900">{value}</p>
+        <p className="text-lg font-bold text-gray-900">{value}</p>
       </div>
 
       {/* Subtitle and trend */}
       <div className="flex items-center justify-between">
         {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
         {trend && trendValue && (
-          <div className={`flex items-center gap-1 ${getTrendColor()}`}>
+          <div className={`flex items-center gap-0.5 ${getTrendColor()} text-xs font-medium`}>
             {getTrendIcon()}
-            <span className="text-xs font-medium">{trendValue}</span>
+            <span>{trendValue}</span>
           </div>
         )}
       </div>

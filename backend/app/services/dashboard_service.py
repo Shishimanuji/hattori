@@ -124,16 +124,21 @@ class DashboardService:
                     "total_resources": 0,
                 }
             
+            # Import AssetType model
+            from app.models.asset_type import AssetType
+            
             # Re-query with distribution grouping, filtered by visible resource IDs
             results = db.query(
                 Resource.asset_type_id,
+                AssetType.name,
                 func.count(Resource.id).label("count"),
                 Resource.status,
-            ).filter(
+            ).join(AssetType, Resource.asset_type_id == AssetType.id).filter(
                 Resource.id.in_(resource_ids),
                 Resource.deleted_at.is_(None)
             ).group_by(
                 Resource.asset_type_id,
+                AssetType.name,
                 Resource.status,
             ).all()
             
@@ -144,11 +149,11 @@ class DashboardService:
                 "total_resources": sum(r.count for r in results),
             }
             
-            for asset_type_id, count, status in results:
-                # By type
-                if asset_type_id not in distribution["by_type"]:
-                    distribution["by_type"][str(asset_type_id)] = 0
-                distribution["by_type"][str(asset_type_id)] += count
+            for asset_type_id, asset_type_name, count, status in results:
+                # By type - use asset type name instead of ID
+                if asset_type_name not in distribution["by_type"]:
+                    distribution["by_type"][asset_type_name] = 0
+                distribution["by_type"][asset_type_name] += count
                 
                 # By status
                 if status not in distribution["by_status"]:

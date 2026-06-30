@@ -213,13 +213,13 @@ const ProjectList: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">
-                      ${project.budget.toLocaleString('en-US', {
+                      ₹{(project.budget * 83).toLocaleString('en-IN', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </div>
                     <p className="text-sm text-gray-500">
-                      Allocated: ${project.allocated_budget.toLocaleString('en-US', {
+                      Allocated: ₹{(project.allocated_budget * 83).toLocaleString('en-IN', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}

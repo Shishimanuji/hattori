@@ -67,9 +67,9 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            {/* Key Metrics Cards - Top Row */}
+            {/* Key Metrics Cards - Balanced 4 column layout */}
             {metrics && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <MetricsCard
                   title="Total Projects"
                   value={metrics.projects.total_projects}
@@ -83,31 +83,32 @@ const Dashboard: React.FC = () => {
                   className="p-3"
                 />
                 <MetricsCard
+                  title="Total Budget"
+                  value={`₹${(metrics.projects.budget.total * 83).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
+                  subtitle="Overall budget"
+                  className="p-3"
+                />
+                <MetricsCard
                   title="Budget Utilization"
                   value={`${metrics.projects.budget.avg_utilization.toFixed(1)}%`}
-                  subtitle="Average utilization"
+                  subtitle="Average across projects"
                   className="p-3"
                   trend={
                     metrics.projects.budget.avg_utilization >= 80 ? 'down' : 'up'
                   }
                   trendValue={
                     metrics.projects.budget.avg_utilization >= 80
-                      ? 'Approaching limit'
-                      : 'Within limits'
+                      ? 'High usage'
+                      : 'Normal'
                   }
-                />
-                <MetricsCard
-                  title="Active Status"
-                  value={metrics.projects.by_status.active}
-                  subtitle={`of ${metrics.projects.total_projects} projects`}
-                  className="p-3"
                 />
               </div>
             )}
 
-            {/* Main Dashboard Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="space-y-4">
+            {/* Main Dashboard Grid - 2 columns on desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-6">
                 <ProjectOverviewCard
                   data={metrics?.projects}
                   isLoading={isLoading}
@@ -119,7 +120,9 @@ const Dashboard: React.FC = () => {
                   error={error}
                 />
               </div>
-              <div className="space-y-4">
+
+              {/* Right Column */}
+              <div className="space-y-6">
                 <BudgetVisualization
                   data={metrics?.budget_status}
                   isLoading={isLoading}
@@ -128,12 +131,14 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Utilization Trends */}
-            <UtilizationTrendChart
-              data={metrics?.trends}
-              isLoading={isLoading}
-              error={error}
-            />
+            {/* Utilization Trends - Full width */}
+            <div className="bg-white rounded-lg shadow border border-gray-200">
+              <UtilizationTrendChart
+                data={metrics?.trends}
+                isLoading={isLoading}
+                error={error}
+              />
+            </div>
           </div>
         )}
 
