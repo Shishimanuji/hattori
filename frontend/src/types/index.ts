@@ -74,6 +74,7 @@ export interface Resource {
   cost: number
   allocation_date: string
   status: 'Active' | 'Inactive'
+  custom_field_values?: Record<string, any>
   custom_fields?: Record<string, any>
   allocation_history?: AllocationHistoryEntry[]
   created_by: string

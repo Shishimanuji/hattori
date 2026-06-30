@@ -7,7 +7,6 @@ import {
   Network,
   Monitor,
   Package,
-  Users,
   BarChart3,
   FileText,
   AlertTriangle,
@@ -15,7 +14,9 @@ import {
   Menu,
   X,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Plus,
+  List
 } from 'lucide-react'
 import './Sidebar.css'
 
@@ -34,7 +35,7 @@ interface SubmenuItem {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['infrastructure']))
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['dashboard', 'projects']))
 
   const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections)
@@ -50,10 +51,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     navigate(path)
   }
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => {
+    // Check exact match or if current path starts with path + '/'
+    if (location.pathname === path) return true
+    if (location.pathname.startsWith(path + '/')) return true
+    return false
+  }
+
+  // Check if any project submenu item is active
+  const isProjectMenuActive = () => {
+    return projectItems.some(item => isActive(item.path))
+  }
+
+  const dashboardItems: SubmenuItem[] = [
+    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
+    { id: 'assets', label: 'Assets', path: '/dashboard/assets', icon: <Package size={18} /> },
+    { id: 'resources', label: 'Resources', path: '/dashboard/resources', icon: <Database size={18} /> },
+    { id: 'documents', label: 'Documents', path: '/dashboard/documents', icon: <FileText size={18} /> },
+    { id: 'reports', label: 'Reports', path: '/dashboard/reports', icon: <BarChart3 size={18} /> },
+    { id: 'alerts', label: 'Alerts', path: '/dashboard/alerts', icon: <AlertTriangle size={18} /> },
+    { id: 'administration', label: 'Administration', path: '/dashboard/administration', icon: <Settings size={18} /> },
+  ]
 
   const infrastructureItems: SubmenuItem[] = [
-    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
     { id: 'infrastructure', label: 'Infrastructure', path: '/infrastructure', icon: <Network size={18} /> },
   ]
 
@@ -64,22 +84,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     { id: 'workstations', label: 'Workstations', path: '/workstations', icon: <Monitor size={18} /> },
   ]
 
-  const assetsItems: SubmenuItem[] = [
-    { id: 'assets', label: 'Assets', path: '/assets', icon: <Package size={18} /> },
-    { id: 'resources', label: 'Resources', path: '/resources', icon: <Users size={18} /> },
-  ]
-
-  const analyticsItems: SubmenuItem[] = [
-    { id: 'analytics', label: 'Analytics', path: '/analytics', icon: <BarChart3 size={18} /> },
-    { id: 'reports', label: 'Reports', path: '/reports', icon: <FileText size={18} /> },
-  ]
-
-  const alertsItems: SubmenuItem[] = [
-    { id: 'alerts', label: 'Alerts', path: '/alerts', icon: <AlertTriangle size={18} /> },
-  ]
-
-  const adminItems: SubmenuItem[] = [
-    { id: 'administration', label: 'Administration', path: '/administration', icon: <Settings size={18} /> },
+  // Projects submenu items
+  const projectItems: SubmenuItem[] = [
+    { id: 'projects-list', label: 'Projects List', path: '/projects', icon: <List size={18} /> },
+    { id: 'add-project', label: 'Add New Project', path: '/projects/add', icon: <Plus size={18} /> },
+    { id: 'assets-list', label: 'Asset List', path: '/assets', icon: <Package size={18} /> },
   ]
 
   return (
@@ -102,6 +111,36 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 
         {/* Navigation Menu */}
         <nav className="sidebar-menu">
+          {/* Dashboard Section */}
+          <div className="sidebar-section">
+            <button
+              className="sidebar-section-header"
+              onClick={() => toggleSection('dashboard')}
+            >
+              <span className="section-title">Dashboard</span>
+              {expandedSections.has('dashboard') ? (
+                <ChevronUp size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+            </button>
+            {expandedSections.has('dashboard') && (
+              <div className="sidebar-submenu">
+                {dashboardItems.map((item) => (
+                  <button
+                    key={item.id}
+                    className={`sidebar-menu-item ${isActive(item.path) ? 'active' : ''}`}
+                    onClick={() => handleNavigate(item.path)}
+                  >
+                    {item.icon}
+                    <span className="menu-text">{item.label}</span>
+                    {isActive(item.path) && <div className="menu-dot" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Infrastructure Section */}
           <div className="sidebar-section">
             <button
@@ -162,112 +201,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             )}
           </div>
 
-          {/* Assets Section */}
+          {/* Projects Section */}
           <div className="sidebar-section">
             <button
-              className="sidebar-section-header"
-              onClick={() => toggleSection('assets')}
+              className={`sidebar-section-header ${isProjectMenuActive() ? 'active' : ''}`}
+              onClick={() => toggleSection('projects')}
             >
-              <span className="section-title">Assets</span>
-              {expandedSections.has('assets') ? (
+              <span className="section-title">Projects</span>
+              {expandedSections.has('projects') ? (
                 <ChevronUp size={16} />
               ) : (
                 <ChevronDown size={16} />
               )}
             </button>
-            {expandedSections.has('assets') && (
+            {expandedSections.has('projects') && (
               <div className="sidebar-submenu">
-                {assetsItems.map((item) => (
-                  <button
-                    key={item.id}
-                    className={`sidebar-menu-item ${isActive(item.path) ? 'active' : ''}`}
-                    onClick={() => handleNavigate(item.path)}
-                  >
-                    {item.icon}
-                    <span className="menu-text">{item.label}</span>
-                    {isActive(item.path) && <div className="menu-dot" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Analytics Section */}
-          <div className="sidebar-section">
-            <button
-              className="sidebar-section-header"
-              onClick={() => toggleSection('analytics')}
-            >
-              <span className="section-title">Analytics</span>
-              {expandedSections.has('analytics') ? (
-                <ChevronUp size={16} />
-              ) : (
-                <ChevronDown size={16} />
-              )}
-            </button>
-            {expandedSections.has('analytics') && (
-              <div className="sidebar-submenu">
-                {analyticsItems.map((item) => (
-                  <button
-                    key={item.id}
-                    className={`sidebar-menu-item ${isActive(item.path) ? 'active' : ''}`}
-                    onClick={() => handleNavigate(item.path)}
-                  >
-                    {item.icon}
-                    <span className="menu-text">{item.label}</span>
-                    {isActive(item.path) && <div className="menu-dot" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Alerts Section */}
-          <div className="sidebar-section">
-            <button
-              className="sidebar-section-header"
-              onClick={() => toggleSection('alerts')}
-            >
-              <span className="section-title">Alerts</span>
-              {expandedSections.has('alerts') ? (
-                <ChevronUp size={12} />
-              ) : (
-                <ChevronDown size={12} />
-              )}
-            </button>
-            {expandedSections.has('alerts') && (
-              <div className="sidebar-submenu">
-                {alertsItems.map((item) => (
-                  <button
-                    key={item.id}
-                    className={`sidebar-menu-item ${isActive(item.path) ? 'active' : ''}`}
-                    onClick={() => handleNavigate(item.path)}
-                  >
-                    {item.icon}
-                    <span className="menu-text">{item.label}</span>
-                    {isActive(item.path) && <div className="menu-dot" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Admin Section */}
-          <div className="sidebar-section">
-            <button
-              className="sidebar-section-header"
-              onClick={() => toggleSection('admin')}
-            >
-              <span className="section-title">Administration</span>
-              {expandedSections.has('admin') ? (
-                <ChevronUp size={16} />
-              ) : (
-                <ChevronDown size={16} />
-              )}
-            </button>
-            {expandedSections.has('admin') && (
-              <div className="sidebar-submenu">
-                {adminItems.map((item) => (
+                {projectItems.map((item) => (
                   <button
                     key={item.id}
                     className={`sidebar-menu-item ${isActive(item.path) ? 'active' : ''}`}

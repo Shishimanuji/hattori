@@ -5,6 +5,8 @@ import { queryClient } from './store/queryClient'
 import Dashboard from './pages/Dashboard'
 import InfrastructureDashboard from './pages/InfrastructureDashboard'
 import Login from './pages/Login'
+import ProjectList from './pages/ProjectList'
+import ProjectForm from './pages/ProjectForm'
 import ProtectedRoute from './components/Common/ProtectedRoute'
 import Navbar from './components/Layout/Navbar'
 import Sidebar from './components/Layout/Sidebar'
@@ -43,16 +45,7 @@ function App() {
             
             {/* Protected routes - require authentication */}
             <Route
-              path="/"
-              element={
-                <ProtectedLayout>
-                  <Dashboard />
-                </ProtectedLayout>
-              }
-            />
-            
-            <Route
-              path="/dashboard"
+              path="/dashboard/:tab?"
               element={
                 <ProtectedLayout>
                   <Dashboard />
@@ -69,8 +62,8 @@ function App() {
               }
             />
             
-            {/* Catch all - redirect to dashboard */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch all - redirect to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

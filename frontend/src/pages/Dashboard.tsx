@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useParams } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { ProjectOverviewCard } from '../components/Dashboard/ProjectOverviewCard'
 import { ResourceDistributionChart } from '../components/Dashboard/ResourceDistributionChart'
@@ -13,21 +14,18 @@ import DashboardTabContent from '../components/Dashboard/DashboardTabContent'
 
 type TabType = 'dashboard' | 'projects' | 'assets' | 'resources' | 'documents' | 'reports' | 'alerts' | 'administration'
 
-const tabs: { id: TabType; label: string; icon: string }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'projects', label: 'Projects', icon: '📁' },
-  { id: 'assets', label: 'Assets', icon: '🖥️' },
-  { id: 'resources', label: 'Resources', icon: '⚙️' },
-  { id: 'documents', label: 'Documents', icon: '📄' },
-  { id: 'reports', label: 'Reports', icon: '📈' },
-  { id: 'alerts', label: 'Alerts', icon: '🔔' },
-  { id: 'administration', label: 'Administration', icon: '⚡' },
-]
-
 const Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard')
+  const { tab } = useParams<{ tab?: string }>()
+  const [activeTab, setActiveTab] = React.useState<TabType>((tab as TabType) || 'dashboard')
   const { data: metrics, isLoading, error } = useDashboardMetrics()
   const { mutate: clearCache, isPending: isClearing } = useClearDashboardCache()
+
+  // Sync URL parameter with local state
+  React.useEffect(() => {
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab as TabType)
+    }
+  }, [tab])
 
   React.useEffect(() => {
     console.log('Dashboard mounted')
@@ -38,36 +36,6 @@ const Dashboard: React.FC = () => {
 
   const handleRefresh = () => {
     clearCache()
-  }
-
-  // Show loading state
-  if (isLoading && !metrics) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Show error state
-  if (error && !metrics) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-lg text-red-600 mb-2">Error loading dashboard</p>
-          <p className="text-sm text-gray-600 mb-4">{error instanceof Error ? error.message : 'Unknown error'}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -91,28 +59,6 @@ const Dashboard: React.FC = () => {
               <RefreshCw size={16} className={isClearing ? 'animate-spin' : ''} />
               Refresh
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 font-medium text-sm whitespace-nowrap border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-                }`}
-              >
-                <span className="mr-1">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
           </div>
         </div>
       </div>

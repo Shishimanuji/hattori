@@ -10,7 +10,7 @@ class ProjectBase(BaseModel):
     """Base project schema with common fields"""
     name: str = Field(..., min_length=1, max_length=255, description="Project name (unique, 1-255 chars)")
     description: Optional[str] = Field(None, description="Project description")
-    budget: Decimal = Field(..., decimal_places=2, description="Project budget (>= 0)")
+    budget: Decimal = Field(..., description="Project budget (>= 0)")
     start_date: Optional[date] = Field(None, description="Project start date")
     end_date: Optional[date] = Field(None, description="Project end date")
 
@@ -43,7 +43,7 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255, description="Project name")
     description: Optional[str] = Field(None, description="Project description")
     status: Optional[str] = Field(None, description="Project status")
-    budget: Optional[Decimal] = Field(None, decimal_places=2, description="Project budget")
+    budget: Optional[Decimal] = Field(None, description="Project budget")
     end_date: Optional[date] = Field(None, description="Project end date")
 
     @field_validator("budget")

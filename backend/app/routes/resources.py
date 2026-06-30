@@ -9,6 +9,7 @@ import logging
 
 from app.core.database import get_db
 from app.models.user import User
+from app.models.resource import Allocation
 from app.schemas.project import ProjectResponse
 from app.utils.dependencies import get_current_user
 from app.services.resource_service import (
@@ -418,4 +419,76 @@ async def delete_resource_endpoint(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error deleting resource: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+
+@router.get("/{resource_id}/history")
+async def get_resource_history(
+    resource_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get allocation history for a resource.
+    
+    - Authentication required (any authenticated user)
+    - RBAC enforced: User can only view history for resources in projects they have access to
+    - Returns all allocation and deallocation events for the resource
+    
+    Path parameters:
+    - resource_id: UUID of resource
+    
+    Returns:
+    - 200 OK: { data: [...] } where each entry contains allocation details
+    - 401 Unauthorized: Not authenticated
+    - 403 Forbidden: No access to resource
+    - 404 Not Found: Resource not found
+    """
+    try:
+        try:
+            parsed_resource_id = UUID(resource_id)
+        except ValueError:
+            raise ValueError(f"Invalid resource_id format: {resource_id}")
+        
+        # Get the resource first to check permissions
+        resource = get_resource_by_id(db, parsed_resource_id)
+        
+        # Check view permission
+        from app.services.project_service import get_project_by_id
+        project = get_project_by_id(db, resource.project_id)
+        
+        if not AuthorizationService.can_view_resource(current_user, resource, project):
+            logger.warning(f"User {current_user.id} denied access to resource history {resource_id}")
+            raise HTTPException(status_code=403, detail="You don't have permission to view this resource")
+        
+        # Get allocation history from the allocations table
+        allocations = db.query(Allocation).filter(
+            Allocation.resource_id == parsed_resource_id
+        ).order_by(Allocation.allocated_at.desc()).all()
+        
+        # Format the response
+        history = []
+        for allocation in allocations:
+            history.append({
+                "allocation_date": allocation.allocated_at.isoformat(),
+                "deallocation_date": allocation.deallocated_at.isoformat() if allocation.deallocated_at else None,
+                "cost_at_allocation": float(allocation.cost_at_allocation),
+                "created_by": str(allocation.created_by),
+            })
+        
+        return {
+            "data": history
+        }
+        
+    except ValueError as e:
+        logger.warning(f"Invalid resource_id: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except ResourceNotFoundError:
+        logger.warning(f"Resource not found: {resource_id}")
+        raise HTTPException(status_code=404, detail="Resource not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving resource history: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")

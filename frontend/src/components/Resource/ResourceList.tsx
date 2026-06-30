@@ -59,20 +59,24 @@ export const ResourceList: React.FC<ResourceListProps> = ({
   const [searchTerm, setSearchTerm] = useState('')
   const [filterAssetType, setFilterAssetType] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
+  const [sortBy, setSortBy] = useState<string>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   // Fetch resources
   const { data, isLoading, error } = useQuery({
-    queryKey: ['resources', { page, limit, projectId, searchTerm }],
+    queryKey: ['resources', { page, limit, projectId, searchTerm, sortBy, sortOrder, filterAssetType, filterStatus }],
     queryFn: async () => {
       const params: any = {
         page: page + 1,
-        limit,
+        page_size: limit,
       }
       if (projectId) params.project_id = projectId
       if (searchTerm) params.search = searchTerm
       if (filterAssetType) params.asset_type_id = filterAssetType
       if (filterStatus) params.status = filterStatus
+      params.sort_by = sortBy
+      params.sort_order = sortOrder
 
       return resourceService.getResources(params)
     },
@@ -82,11 +86,11 @@ export const ResourceList: React.FC<ResourceListProps> = ({
   // Fetch asset types for filter dropdown
   const { data: assetTypesData } = useQuery({
     queryKey: ['assetTypes', { limit: 100 }],
-    queryFn: () => resourceService.getResources({ limit: 100 }),
+    queryFn: () => resourceService.getResources({ page_size: 100 }),
     select: (data) => {
       // Extract unique asset types from resources
       const assetTypes = new Map<string, string>()
-      data.data?.forEach((resource: Resource) => {
+      data.resources?.forEach((resource: Resource) => {
         if (resource.asset_type_id && !assetTypes.has(resource.asset_type_id)) {
           assetTypes.set(resource.asset_type_id, resource.asset_type_id)
         }
@@ -98,7 +102,7 @@ export const ResourceList: React.FC<ResourceListProps> = ({
     },
   })
 
-  const resources = data?.data || []
+  const resources = data?.resources || []
   const total = data?.total || 0
   const totalPages = Math.ceil(total / limit)
 
@@ -139,7 +143,7 @@ export const ResourceList: React.FC<ResourceListProps> = ({
   return (
     <div className="space-y-4">
       {/* Search and filter controls */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
           <input
@@ -189,17 +193,43 @@ export const ResourceList: React.FC<ResourceListProps> = ({
           </select>
         </div>
 
-        <div className="flex items-end">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value)
+              setPage(0)
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          >
+            <option value="created_at">Created Date</option>
+            <option value="name">Name</option>
+            <option value="cost">Cost</option>
+            <option value="updated_at">Updated Date</option>
+          </select>
+        </div>
+
+        <div className="flex items-end gap-2">
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+          >
+            {sortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
+          </button>
           <button
             onClick={() => {
               setSearchTerm('')
               setFilterAssetType('')
               setFilterStatus('')
+              setSortBy('created_at')
+              setSortOrder('desc')
               setPage(0)
             }}
-            className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Clear Filters
+            Reset
           </button>
         </div>
       </div>

@@ -11,14 +11,6 @@ class LoginRequest(BaseModel):
     password: str = Field(..., min_length=8)
 
 
-class LoginResponse(BaseModel):
-    """Login response schema"""
-    access_token: str
-    token_type: str = "bearer"
-    expires_in: int = Field(description="Token expiration in seconds")
-    user: 'CurrentUserResponse' = Field(description="Authenticated user information")
-
-
 class LogoutResponse(BaseModel):
     """Logout response schema"""
     message: str = "Successfully logged out"
@@ -43,6 +35,14 @@ class CurrentUserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class LoginResponse(BaseModel):
+    """Login response schema"""
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = Field(description="Token expiration in seconds")
+    user: CurrentUserResponse = Field(description="Authenticated user information")
 
 
 class PasswordResetRequestRequest(BaseModel):
