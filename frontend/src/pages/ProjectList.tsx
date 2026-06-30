@@ -51,7 +51,7 @@ const ProjectList: React.FC = () => {
     },
   })
 
-  const projects = data?.data || []
+  const projects = data?.projects || data?.data || []
   const total = data?.total || 0
   const totalPages = Math.ceil(total / pageSize)
 

@@ -7,6 +7,7 @@ import InfrastructureDashboard from './pages/InfrastructureDashboard'
 import Login from './pages/Login'
 import ProjectList from './pages/ProjectList'
 import ProjectForm from './pages/ProjectForm'
+import AssetList from './pages/AssetList'
 import ProtectedRoute from './components/Common/ProtectedRoute'
 import Navbar from './components/Layout/Navbar'
 import Sidebar from './components/Layout/Sidebar'
@@ -58,6 +59,34 @@ function App() {
               element={
                 <ProtectedLayout>
                   <InfrastructureDashboard />
+                </ProtectedLayout>
+              }
+            />
+            
+            {/* Projects routes */}
+            <Route
+              path="/projects"
+              element={
+                <ProtectedLayout>
+                  <ProjectList />
+                </ProtectedLayout>
+              }
+            />
+            
+            <Route
+              path="/projects/add"
+              element={
+                <ProtectedLayout>
+                  <ProjectForm />
+                </ProtectedLayout>
+              }
+            />
+            
+            <Route
+              path="/assets"
+              element={
+                <ProtectedLayout>
+                  <AssetList />
                 </ProtectedLayout>
               }
             />
